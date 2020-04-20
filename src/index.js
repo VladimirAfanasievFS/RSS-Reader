@@ -6,3 +6,4 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const funct = () => {
   console.log('AUAUA111');
 };
+export default funct;
