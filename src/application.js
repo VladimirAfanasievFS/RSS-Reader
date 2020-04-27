@@ -61,7 +61,7 @@ const app = () => {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     let { url } = state.form.fields;
-    const preparedUrl = `http://cors-anywhere.herokuapp.com/${url}`;
+    const preparedUrl = `https://cors-anywhere.herokuapp.com/${url}`;
 
     state.message = 'sending';
     state.processState = processState.sending;
