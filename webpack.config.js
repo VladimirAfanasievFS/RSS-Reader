@@ -25,7 +25,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'My App',
-      template: 'src/index.html',
+      template: 'public/index.html',
     }),
   ],
 };
