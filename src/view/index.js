@@ -74,8 +74,9 @@ const view = (state, form, jumbotron) => {
         break;
       }
       case processState.invalid: {
-        form.elements.add.disabled = true;
+        form.elements.add.disabled = !!state.error.error;
         form.elements.url.classList.add('is-invalid');
+
         form.after(renderFeedBack(state.error, 'text-danger'));
         break;
       }
