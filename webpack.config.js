@@ -19,6 +19,13 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /locales/,
+        loader: '@alienfast/i18next-loader',
+        // options here
+        query: { basenameAsNamespace: true },
+      //  query: { overrides: ['../node_modules/lib/locales'] },
+      },
     ],
   },
   plugins: [

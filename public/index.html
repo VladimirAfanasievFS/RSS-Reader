@@ -10,10 +10,12 @@
 <body class="d-flex flex-column h-100">
     <div class="container mt-5">
       <div class="jumbotron ">
-        <h1>RSS Reader</h1>
-        <p class="lead">Start reading RSS today! It is easy, it is nicely.</p>
-        <p class="text-muted">https://ru.hexlet.io/lessons.rss</p>
-        <p class="text-muted">http://lorem-rss.herokuapp.com/feed?unit=second&interval=30</p>
+        <button id=english>English</button>
+        <button id=russian>Русский</button>
+        <h1 class="mt-3"></h1>
+        <p class="lead"></p>
+        <p id=example class="text-muted"></p>
+        <p id=example2 class="text-muted"></p>
         <form action="" class="form-inline rss-form">
           <div class="form-group">
             <input id="inputLink" type="text" required="" name="url" class="form-control" placeholder="rss link">
@@ -21,7 +23,9 @@
           <button type="submit" disabled=true class="btn btn-primary ml-1" name="add">Add</button>
         </form>
         <div class="feedback"></div>
+        
       </div>
+      
     </div> 
  
 </body>

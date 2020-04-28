@@ -1,5 +1,6 @@
 import { watch } from 'melanke-watchjs';
 import { processState } from '../constant';
+import i18next from '../i18next';
 
 const renderFeedBack = (text, colorText) => {
   const feedbackElement = document.createElement('div');
@@ -70,24 +71,30 @@ const view = (state, form, jumbotron) => {
       case processState.valid: {
         form.elements.add.disabled = false;
         form.elements.url.classList.remove('is-invalid');
-        form.after(renderFeedBack(state.message, 'text-success'));
+        form.after(renderFeedBack(i18next.t('app.URL correct'), 'text-success'));
         break;
       }
       case processState.invalid: {
-        form.elements.add.disabled = !!state.error.error;
+        form.elements.add.disabled = true;
         form.elements.url.classList.add('is-invalid');
+
+        form.after(renderFeedBack(state.error, 'text-danger'));
+        break;
+      }
+      case processState.errorNetwork: {
+        form.elements.add.disabled = false;
 
         form.after(renderFeedBack(state.error, 'text-danger'));
         break;
       }
       case processState.sending: {
         form.elements.add.disabled = true;
-        form.after(renderFeedBack(state.message, 'text-info'));
+        form.after(renderFeedBack(i18next.t('app.request sending'), 'text-info'));
         break;
       }
       case processState.completed: {
         form.elements.add.disabled = true;
-        form.after(renderFeedBack(state.message, 'text-success'));
+        form.after(renderFeedBack(i18next.t('app.Rss has been loaded'), 'text-success'));
         break;
       }
       default: {
