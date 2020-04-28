@@ -3,15 +3,9 @@ import axios from 'axios';
 import _ from 'lodash';
 import parseXML from './parser/index';
 import view from './view/index';
-import { processState } from './constant';
+import processState from './constant';
 import i18next from './i18next';
 
-const updateStreams = (state) => {
-  const requests = state.rss.streams.map((stream) => updateTopic(state, stream));
-  Promise.all(requests).then(() => {
-    setTimeout(() => { updateStreams(state); }, 5000);
-  });
-};
 
 const updateTopic = (state, stream) => {
   const { url, ID } = stream;
@@ -45,6 +39,14 @@ const updateTopic = (state, stream) => {
       console.log(error);
     });
 };
+
+const updateStreams = (state) => {
+  const requests = state.rss.streams.map((stream) => updateTopic(state, stream));
+  Promise.all(requests).then(() => {
+    setTimeout(() => { updateStreams(state); }, 5000);
+  });
+};
+
 const getRSS = (state) => {
   let { url } = state.form.fields;
   const preparedUrl = `https://cors-anywhere.herokuapp.com/${url}`;

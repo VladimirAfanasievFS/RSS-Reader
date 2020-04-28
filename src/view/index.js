@@ -1,5 +1,5 @@
 import { watch } from 'melanke-watchjs';
-import { processState } from '../constant';
+import processState from '../constant';
 import i18next from '../i18next';
 
 const renderFeedBack = (text, colorText) => {

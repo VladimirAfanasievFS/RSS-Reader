@@ -6,4 +6,4 @@ const processState = {
   completed: 'completed',
 };
 
-export { processState };
+export default processState;
