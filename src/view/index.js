@@ -1,8 +1,8 @@
 import { watch } from 'melanke-watchjs';
-import processState from '../constant';
+import processState from '../constants';
 import i18next from '../i18next';
 
-const renderFeedBack = (text, colorText) => {
+const renderFeedback = (text, colorText) => {
   const feedbackElement = document.createElement('div');
   feedbackElement.classList.add('feedback');
   feedbackElement.classList.add(colorText);
@@ -34,12 +34,15 @@ const renderRSS = (element, rss) => {
   const rssLinks = document.createElement('div');
   rssLinks.classList.add('col-6');
   rssLinks.classList.add('rss-links');
-  const newTopTopics = rss.topics.map((el) => el).sort((topicA, topicB) => {
+
+  // без вставки .map((el) => el) все ломается(приложение в браузере
+  // зависает , отладить не получается). Из за того что sort не имутабельная функция и ломает state?
+  // Буду благодарен за комментарий
+  rss.topics.map((el) => el).sort((topicA, topicB) => {
     const d1 = new Date(topicA.pubDate);
     const d2 = new Date(topicB.pubDate);
     return d2.getTime() - d1.getTime();
-  });
-  newTopTopics.map((topic) => {
+  }).map((topic) => {
     const div = document.createElement('div');
     const link = document.createElement('a');
     link.href = topic.link;
@@ -52,9 +55,11 @@ const renderRSS = (element, rss) => {
   element.after(row);
 };
 
-const view = (state, form, jumbotron) => {
-  watch(state.form, 'fields', (prop) => {
-    form[prop].value = state.form.fields.url;
+const view = (state, jumbotron) => {
+  const form = jumbotron.querySelector('form');
+
+  watch(state, 'form', (prop) => {
+    form[prop].value = state.form.url;
   });
 
   watch(state, 'rss', () => {
@@ -71,35 +76,34 @@ const view = (state, form, jumbotron) => {
       case processState.valid: {
         form.elements.add.disabled = false;
         form.elements.url.classList.remove('is-invalid');
-        form.after(renderFeedBack(i18next.t('app.URL correct'), 'text-success'));
+        form.after(renderFeedback(i18next.t('app.URL correct'), 'text-success'));
         break;
       }
       case processState.invalid: {
         form.elements.add.disabled = true;
         form.elements.url.classList.add('is-invalid');
 
-        form.after(renderFeedBack(state.error, 'text-danger'));
+        form.after(renderFeedback(state.error, 'text-danger'));
         break;
       }
       case processState.errorNetwork: {
         form.elements.add.disabled = false;
 
-        form.after(renderFeedBack(state.error, 'text-danger'));
+        form.after(renderFeedback(state.error, 'text-danger'));
         break;
       }
       case processState.sending: {
         form.elements.add.disabled = true;
-        form.after(renderFeedBack(i18next.t('app.request sending'), 'text-info'));
+        form.after(renderFeedback(i18next.t('app.request sending'), 'text-info'));
         break;
       }
       case processState.completed: {
         form.elements.add.disabled = true;
-        form.after(renderFeedBack(i18next.t('app.Rss has been loaded'), 'text-success'));
+        form.after(renderFeedback(i18next.t('app.Rss has been loaded'), 'text-success'));
         break;
       }
       default: {
-        form.elements.add.disabled = false;
-        break;
+        throw new Error(`Unknown processState: '${state.processState}'!`);
       }
     }
   });

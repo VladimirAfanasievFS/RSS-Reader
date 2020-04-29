@@ -1,21 +1,20 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import _ from 'lodash';
-import parseXML from './parser/index';
+import parseXML from './parseXML/index';
 import view from './view/index';
-import processState from './constant';
+import processState from './constants';
 import i18next from './i18next';
 
+const getPreparedUrl = (url) => `https://cors-anywhere.herokuapp.com/${url}`;
 
-const updateTopic = (state, stream) => {
+const getNewTopics = (state, stream) => {
   const { url, ID } = stream;
 
-  const preparedUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-  // state.processState = processState.sending;
   console.log('sending');
   axios({
     method: 'get',
-    url: preparedUrl,
+    url: getPreparedUrl(url),
   })
     .then((response) => {
       const { items } = parseXML(response.data);
@@ -25,15 +24,14 @@ const updateTopic = (state, stream) => {
         const newTopic = storededTopics.filter((topic) => _.isMatch(topic, item));
         return _.isEmpty(newTopic);
       });
-      console.log('updateTopic -> test', newTopics);
-      newTopics.filter((item) => item)
-        .map((item) => {
-          state.rss.topics.push({
-            ...item,
-            streamID: ID,
-          });
-          return null;
+
+      newTopics.map((item) => {
+        state.rss.topics.push({
+          ...item,
+          streamID: ID,
         });
+        return null;
+      });
       console.log('completed');
     }).catch((error) => {
       console.log(error);
@@ -41,25 +39,25 @@ const updateTopic = (state, stream) => {
 };
 
 const updateStreams = (state) => {
-  const requests = state.rss.streams.map((stream) => updateTopic(state, stream));
+  const requests = state.rss.streams.map((stream) => getNewTopics(state, stream));
   Promise.all(requests).then(() => {
     setTimeout(() => { updateStreams(state); }, 5000);
   });
 };
 
-const getRSS = (state) => {
-  let { url } = state.form.fields;
-  const preparedUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+const addStream = (state) => {
+  let { url } = state.form;
+
   state.processState = processState.sending;
   axios({
     method: 'get',
-    url: preparedUrl,
+    url: getPreparedUrl(url),
   })
     .then((response) => {
       const { title, description } = parseXML(response.data);
 
       state.rss.streams.push({
-        url: state.form.fields.url,
+        url: state.form.url,
         title,
         description,
         ID: _.uniqueId(),
@@ -88,11 +86,11 @@ const validatyInput = (state) => {
 
     url: yup.string().url().notOneOf(urls).required(),
   });
+
   try {
-    schema.validateSync(state.form.fields);
+    schema.validateSync(state.form);
     state.processState = processState.valid;
   } catch (error) {
-    console.log(error);
     state.processState = processState.invalid;
     state.error = error.message;
   }
@@ -101,16 +99,14 @@ const validatyInput = (state) => {
 const app = () => {
   const state = {
     form: {
-      fields: {
-        url: '',
-      },
+      url: '',
     },
     rss: {
       streams: [],
       topics: [],
     },
     processState: processState.init,
-    error: {},
+    error: null,
   };
 
   const englishButton = document.querySelector('#english');
@@ -124,20 +120,20 @@ const app = () => {
   });
 
   const form = document.querySelector('form');
-  const jumbotron = document.querySelector('.jumbotron');
-
   form.elements.url.addEventListener('input', (e) => {
-    state.form.fields.url = e.target.value;
+    state.form.url = e.target.value;
     validatyInput(state);
   });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    // addRSS(state);
-    getRSS(state);
+    addStream(state);
   });
+
   updateStreams(state);
-  view(state, form, jumbotron);
+
+  const jumbotron = document.querySelector('.jumbotron');
+  view(state, jumbotron);
 };
 
 
