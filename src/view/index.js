@@ -1,5 +1,5 @@
 import { watch } from 'melanke-watchjs';
-import processState from '../constants';
+import processState from '../namedConstants';
 import i18next from '../i18next';
 
 const renderFeedback = (text, colorText) => {
@@ -38,6 +38,7 @@ const renderRSS = (element, rss) => {
   // без вставки .map((el) => el) все ломается(приложение в браузере
   // зависает , отладить не получается). Из за того что sort не имутабельная функция и ломает state?
   // Буду благодарен за комментарий
+
   rss.topics.map((el) => el).sort((topicA, topicB) => {
     const d1 = new Date(topicA.pubDate);
     const d2 = new Date(topicB.pubDate);

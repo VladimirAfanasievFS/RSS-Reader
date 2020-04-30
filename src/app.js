@@ -1,9 +1,9 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import _ from 'lodash';
-import parseXML from './parseXML/index';
-import view from './view/index';
-import processState from './constants';
+import parseDoc from './parseDoc';
+import view from './view';
+import processState from './namedConstants';
 import i18next from './i18next';
 
 const getPreparedUrl = (url) => `https://cors-anywhere.herokuapp.com/${url}`;
@@ -17,14 +17,14 @@ const getNewTopics = (state, stream) => {
     url: getPreparedUrl(url),
   })
     .then((response) => {
-      const { items } = parseXML(response.data);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(response.data, 'application/xml');
+      const { rss: { channel: { item: items } } } = parseDoc(doc.children);
       const storededTopics = state.rss.topics.filter((topic) => topic.streamID === ID);
-
       const newTopics = items.filter((item) => {
         const newTopic = storededTopics.filter((topic) => _.isMatch(topic, item));
         return _.isEmpty(newTopic);
       });
-
       newTopics.map((item) => {
         state.rss.topics.push({
           ...item,
@@ -54,8 +54,9 @@ const addStream = (state) => {
     url: getPreparedUrl(url),
   })
     .then((response) => {
-      const { title, description } = parseXML(response.data);
-
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(response.data, 'application/xml');
+      const { rss: { channel: { title, description } } } = parseDoc(doc.children);
       state.rss.streams.push({
         url: state.form.url,
         title,
