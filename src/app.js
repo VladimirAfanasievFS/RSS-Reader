@@ -41,7 +41,7 @@ const updateStreams = (state) => {
 };
 
 const addStream = (state) => {
-  let { url } = state.form;
+  const { url } = state.form;
 
   state.processState = processState.sending;
   axios.get(getPreparedUrl(url))
@@ -53,7 +53,7 @@ const addStream = (state) => {
         description,
         ID: _.uniqueId(),
       });
-      url = '';
+      state.form.url = '';
       state.processState = processState.completed;
     }).catch((error) => {
       state.error = error;
