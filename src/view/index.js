@@ -21,13 +21,12 @@ const renderRSS = (element, rss) => {
   const rssItems = document.createElement('div');
   rssItems.classList.add('col-6');
   rssItems.classList.add('rss-items');
-  rss.streams.map((stream) => {
+  rss.streams.forEach((stream) => {
     const div = document.createElement('div');
     const text = document.createElement('p');
     text.innerHTML = `${stream.title} : ${stream.description}`;
     div.appendChild(text);
     rssItems.appendChild(div);
-    return null;
   });
   row.appendChild(rssItems);
 
@@ -43,14 +42,13 @@ const renderRSS = (element, rss) => {
     const d1 = new Date(topicA.pubDate);
     const d2 = new Date(topicB.pubDate);
     return d2.getTime() - d1.getTime();
-  }).map((topic) => {
+  }).forEach((topic) => {
     const div = document.createElement('div');
     const link = document.createElement('a');
     link.href = topic.link;
     link.innerHTML = topic.title;
     div.appendChild(link);
     rssLinks.appendChild(div);
-    return null;
   });
   row.appendChild(rssLinks);
   element.after(row);

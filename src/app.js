@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import _ from 'lodash';
-import parseDoc from './parseDoc';
+import parseRSS from './parseRSS';
 import view from './view';
 import processState from './namedConstants';
 import i18next from './i18next';
@@ -12,29 +12,24 @@ const getNewTopics = (state, stream) => {
   const { url, ID } = stream;
 
   console.log('sending');
-  axios({
-    method: 'get',
-    url: getPreparedUrl(url),
-  })
+  axios.get(getPreparedUrl(url))
     .then((response) => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(response.data, 'application/xml');
-      const { rss: { channel: { item: items } } } = parseDoc(doc.children);
+      const { items } = parseRSS(response.data);
       const storededTopics = state.rss.topics.filter((topic) => topic.streamID === ID);
       const newTopics = items.filter((item) => {
         const newTopic = storededTopics.filter((topic) => _.isMatch(topic, item));
         return _.isEmpty(newTopic);
       });
-      newTopics.map((item) => {
+      newTopics.forEach((item) => {
         state.rss.topics.push({
           ...item,
           streamID: ID,
         });
-        return null;
       });
       console.log('completed');
     }).catch((error) => {
       console.log(error);
+      throw new Error(error);
     });
 };
 
@@ -49,16 +44,11 @@ const addStream = (state) => {
   let { url } = state.form;
 
   state.processState = processState.sending;
-  axios({
-    method: 'get',
-    url: getPreparedUrl(url),
-  })
+  axios.get(getPreparedUrl(url))
     .then((response) => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(response.data, 'application/xml');
-      const { rss: { channel: { title, description } } } = parseDoc(doc.children);
+      const { title, description } = parseRSS(response.data);
       state.rss.streams.push({
-        url: state.form.url,
+        url,
         title,
         description,
         ID: _.uniqueId(),
@@ -68,19 +58,11 @@ const addStream = (state) => {
     }).catch((error) => {
       state.error = error;
       state.processState = processState.errorNetwork;
+      throw new Error(error);
     });
 };
 
 const validatyInput = (state) => {
-  yup.setLocale({
-    mixed: {
-      notOneOf: i18next.t('app.Rss already exists'),
-    },
-    string: {
-      url: i18next.t('app.this must be a valid URL'),
-    },
-  });
-
   const urls = state.rss.streams.map((el) => el.url);
 
   const schema = yup.object().shape({
@@ -109,6 +91,15 @@ const app = () => {
     processState: processState.init,
     error: null,
   };
+
+  yup.setLocale({
+    mixed: {
+      notOneOf: i18next.t('app.Rss already exists'),
+    },
+    string: {
+      url: i18next.t('app.this must be a valid URL'),
+    },
+  });
 
   const englishButton = document.querySelector('#english');
   englishButton.addEventListener('click', () => {

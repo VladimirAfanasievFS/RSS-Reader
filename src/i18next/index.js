@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import resources from './locales';
+import resources from '../locales';
 
 const updateContent = () => {
   document.querySelector('.jumbotron>h1').innerHTML = i18next.t('html.RSS Reader');

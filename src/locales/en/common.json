@@ -1,0 +1,15 @@
+{
+  "html": {
+    "RSS Reader": "RSS Reader",
+    "Start reading RSS today! It is easy, it is nicely": "Start reading RSS today! It is easy, it is nicely.",
+    "hexletLink": "https://ru.hexlet.io/lessons.rss",
+    "30SecondLink": "http://lorem-rss.herokuapp.com/feed?unit=second&interval=30"
+  },
+  "app": {
+    "Rss already exists": "Rss already exists",
+    "this must be a valid URL": "this must be a valid URL",
+    "Rss has been loaded": "Rss has been loaded",
+    "request sending": "request sending",
+    "URL correct": "URL correct"
+  }
+}
