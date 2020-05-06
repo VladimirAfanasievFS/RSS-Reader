@@ -21,10 +21,10 @@ const renderRSS = (element, rss) => {
   const rssItems = document.createElement('div');
   rssItems.classList.add('col-6');
   rssItems.classList.add('rss-items');
-  rss.streams.forEach((stream) => {
+  rss.feeds.forEach((feed) => {
     const div = document.createElement('div');
     const text = document.createElement('p');
-    text.innerHTML = `${stream.title} : ${stream.description}`;
+    text.innerHTML = `${feed.title} : ${feed.description}`;
     div.appendChild(text);
     rssItems.appendChild(div);
   });
@@ -38,11 +38,7 @@ const renderRSS = (element, rss) => {
   // зависает , отладить не получается). Из за того что sort не имутабельная функция и ломает state?
   // Буду благодарен за комментарий
 
-  rss.topics.map((el) => el).sort((topicA, topicB) => {
-    const d1 = new Date(topicA.pubDate);
-    const d2 = new Date(topicB.pubDate);
-    return d2.getTime() - d1.getTime();
-  }).forEach((topic) => {
+  rss.topics.forEach((topic) => {
     const div = document.createElement('div');
     const link = document.createElement('a');
     link.href = topic.link;

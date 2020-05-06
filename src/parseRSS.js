@@ -1,6 +1,7 @@
 
-const toObject = (document) => {
-  const result = [...document.children]
+const toObject = (doc) => {
+  // const vv = _.keyBy([...doc.children], 'localName');
+  const result = [...doc.children]
     .reduce((acc, el) => ({ ...acc, [el.localName]: el.textContent }), {});
   return result;
 };

@@ -8,46 +8,40 @@ import i18next from './i18next';
 
 const getPreparedUrl = (url) => `https://cors-anywhere.herokuapp.com/${url}`;
 
-const getNewTopics = (state, stream) => {
-  const { url, ID } = stream;
+const getNewTopics = (state, feed) => {
+  const { url, ID } = feed;
 
   console.log('sending');
   axios.get(getPreparedUrl(url))
     .then((response) => {
       const { items } = parseRSS(response.data);
-      const storededTopics = state.rss.topics.filter((topic) => topic.streamID === ID);
-      const newTopics = items.filter((item) => {
-        const newTopic = storededTopics.filter((topic) => _.isMatch(topic, item));
-        return _.isEmpty(newTopic);
-      });
+      const storededTopics = state.rss.topics.filter((topic) => topic.feedID === ID);
+      const newTopics = _.differenceBy(items, storededTopics, 'guid');
       newTopics.forEach((item) => {
-        state.rss.topics.push({
+        state.rss.topics.unshift({
           ...item,
-          streamID: ID,
+          feedID: ID,
         });
       });
       console.log('completed');
-    }).catch((error) => {
-      console.log(error);
-      throw new Error(error);
     });
 };
 
-const updateStreams = (state) => {
-  const requests = state.rss.streams.map((stream) => getNewTopics(state, stream));
+const updateFeeds = (state) => {
+  const requests = state.rss.feeds.map((feed) => getNewTopics(state, feed));
   Promise.all(requests).then(() => {
-    setTimeout(() => { updateStreams(state); }, 5000);
+    setTimeout(() => { updateFeeds(state); }, 5000);
   });
 };
 
-const addStream = (state) => {
+const addFeed = (state) => {
   const { url } = state.form;
 
   state.processState = processState.sending;
   axios.get(getPreparedUrl(url))
     .then((response) => {
       const { title, description } = parseRSS(response.data);
-      state.rss.streams.push({
+      state.rss.feeds.push({
         url,
         title,
         description,
@@ -62,8 +56,8 @@ const addStream = (state) => {
     });
 };
 
-const validatyInput = (state) => {
-  const urls = state.rss.streams.map((el) => el.url);
+const validateInput = (state) => {
+  const urls = state.rss.feeds.map((el) => el.url);
 
   const schema = yup.object().shape({
 
@@ -85,7 +79,7 @@ const app = () => {
       url: '',
     },
     rss: {
-      streams: [],
+      feeds: [],
       topics: [],
     },
     processState: processState.init,
@@ -114,15 +108,14 @@ const app = () => {
   const form = document.querySelector('form');
   form.elements.url.addEventListener('input', (e) => {
     state.form.url = e.target.value;
-    validatyInput(state);
+    validateInput(state);
   });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    addStream(state);
+    addFeed(state);
   });
-
-  updateStreams(state);
+  updateFeeds(state);
 
   const jumbotron = document.querySelector('.jumbotron');
   view(state, jumbotron);
