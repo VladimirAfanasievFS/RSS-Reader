@@ -34,10 +34,6 @@ const renderRSS = (element, rss) => {
   rssLinks.classList.add('col-6');
   rssLinks.classList.add('rss-links');
 
-  // без вставки .map((el) => el) все ломается(приложение в браузере
-  // зависает , отладить не получается). Из за того что sort не имутабельная функция и ломает state?
-  // Буду благодарен за комментарий
-
   rss.topics.forEach((topic) => {
     const div = document.createElement('div');
     const link = document.createElement('a');
