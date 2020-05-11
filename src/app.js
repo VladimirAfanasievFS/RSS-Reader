@@ -8,17 +8,17 @@ import i18next from './i18next';
 
 const getPreparedUrl = (url) => `https://cors-anywhere.herokuapp.com/${url}`;
 
-const getNewTopics = (state, feed) => {
+const getNewPosts = (state, feed) => {
   const { url, ID } = feed;
 
   console.log('sending');
   axios.get(getPreparedUrl(url))
     .then((response) => {
       const { items } = parseRSS(response.data);
-      const storededTopics = state.rss.topics.filter((topic) => topic.feedID === ID);
-      const newTopics = _.differenceBy(items, storededTopics, 'guid');
-      newTopics.forEach((item) => {
-        state.rss.topics.unshift({
+      const storededPosts = state.rss.posts.filter((topic) => topic.feedID === ID);
+      const newPosts = _.differenceBy(items, storededPosts, 'guid');
+      newPosts.forEach((item) => {
+        state.rss.posts.unshift({
           ...item,
           feedID: ID,
         });
@@ -27,10 +27,13 @@ const getNewTopics = (state, feed) => {
     });
 };
 
-const updateFeeds = (state) => {
-  const requests = state.rss.feeds.map((feed) => getNewTopics(state, feed));
+const finallyFeeds = (state) => {
+  const requests = state.rss.feeds.map((feed) => getNewPosts(state, feed));
   Promise.all(requests).then(() => {
-    setTimeout(() => { updateFeeds(state); }, 5000);
+    setTimeout(() => {
+      console.log('timeout');
+      finallyFeeds(state);
+    }, 5000);
   });
 };
 
@@ -41,17 +44,21 @@ const addFeed = (state) => {
   axios.get(getPreparedUrl(url))
     .then((response) => {
       const { title, description } = parseRSS(response.data);
-      state.rss.feeds.push({
+      const feed = {
         url,
         title,
         description,
         ID: _.uniqueId(),
-      });
+      };
+      state.rss.feeds.push(feed);
       state.form.url = '';
       state.processState = processState.completed;
-    }).catch((error) => {
-      state.error = error;
-      state.processState = processState.errorNetwork;
+      return feed;
+    })
+    .then((feed) => getNewPosts(state, feed))
+    .catch((error) => {
+      state.reason = error;
+      state.processState = processState.failed;
       throw new Error(error);
     });
 };
@@ -69,7 +76,7 @@ const validateInput = (state) => {
     state.processState = processState.valid;
   } catch (error) {
     state.processState = processState.invalid;
-    state.error = error.message;
+    state.reason = error.message;
   }
 };
 
@@ -80,10 +87,10 @@ const app = () => {
     },
     rss: {
       feeds: [],
-      topics: [],
+      posts: [],
     },
     processState: processState.init,
-    error: null,
+    reason: null,
   };
 
   yup.setLocale({
@@ -115,7 +122,7 @@ const app = () => {
     e.preventDefault();
     addFeed(state);
   });
-  updateFeeds(state);
+  finallyFeeds(state);
 
   const jumbotron = document.querySelector('.jumbotron');
   view(state, jumbotron);
