@@ -1,7 +1,7 @@
 const processState = {
   valid: 'valid',
   invalid: 'invalid',
-  errorNetwork: 'errorNetwork',
+  failed: 'failed',
   sending: 'sending',
   completed: 'completed',
 };

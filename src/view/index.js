@@ -34,7 +34,7 @@ const renderRSS = (element, rss) => {
   rssLinks.classList.add('col-6');
   rssLinks.classList.add('rss-links');
 
-  rss.topics.forEach((topic) => {
+  rss.posts.forEach((topic) => {
     const div = document.createElement('div');
     const link = document.createElement('a');
     link.href = topic.link;
@@ -74,13 +74,13 @@ const view = (state, jumbotron) => {
         form.elements.add.disabled = true;
         form.elements.url.classList.add('is-invalid');
 
-        form.after(renderFeedback(state.error, 'text-danger'));
+        form.after(renderFeedback(state.reason, 'text-danger'));
         break;
       }
-      case processState.errorNetwork: {
+      case processState.failed: {
         form.elements.add.disabled = false;
 
-        form.after(renderFeedback(state.error, 'text-danger'));
+        form.after(renderFeedback(state.reason, 'text-danger'));
         break;
       }
       case processState.sending: {
